@@ -1,4 +1,6 @@
 import psycopg2
+import matplotlib.pyplot as plt
+import sys
 
 # Try to connect
 
@@ -9,10 +11,11 @@ except:
 
 cur = conn.cursor()
 
+input_var = raw_input("Enter search term: ")
+input_var = "'%"+input_var+"%'"   # format SQL string
+
 try:
-  cur.execute("""SELECT DISTINCT ON(created_at) created_at, author FROM hn_comments WHERE comment_text LIKE '%segment.com%' OR comment_text LIKE '%segment.io%' ORDER BY created_at ASC""")
-  # cur.execute("""SELECT created_at, COUNT(*) from hn_comments WHERE comment_text LIKE '%segment.io%' ORDER BY created_at""")
-  # cur.execute("""SELECT COUNT(*) from hn_comments""")
+  cur.execute("""SELECT DISTINCT ON(created_at) created_at, author FROM hn_comments WHERE comment_text LIKE %s ORDER BY created_at ASC""" % input_var)
 except:
   print "Could not run select command"
 
@@ -20,3 +23,4 @@ rows = cur.fetchall()
 
 for row in rows:
   print "r: ", row
+
