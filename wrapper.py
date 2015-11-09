@@ -1,6 +1,7 @@
 import psycopg2
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 import sys
 
 
@@ -13,24 +14,31 @@ except:
 
 cur = conn.cursor()
 
-# input_var = raw_input("Enter single search term or phrase: ")
-# input_var = "'%"+input_var+"%'"   # format SQL string
+input_var = raw_input("Enter single search term or phrase, separated by commas: ")
+inputs = input_var.split(',')
 
-try:
-  # cur.execute("""SELECT DISTINCT ON(created_at) created_at, author FROM hn_comments WHERE comment_text LIKE %s ORDER BY created_at ASC""" % input_var)
-  # hardcoded for testing
-  cur.execute("""SELECT DISTINCT ON(created_at) created_at, author FROM hn_comments WHERE comment_text LIKE '%segment.io%' ORDER BY created_at ASC""")
-except:
-  print "Could not run select command"
+for input_i in inputs:
+  input_i = input_i.strip()
+  input_i = "'%"+input_i+"%'"   # format SQL string
+  try:
+    cur.execute("""SELECT DISTINCT ON(created_at) created_at, author FROM hn_comments WHERE comment_text LIKE %s ORDER BY created_at ASC""" % input_i)
+    # hardcoded for testing
+    # cur.execute("""SELECT DISTINCT ON(created_at) created_at, author FROM hn_comments WHERE comment_text LIKE '%segment.io%' ORDER BY created_at ASC""")
+  except:
+    print "Could not run select command"
 
-rows = cur.fetchall()
+  rows = cur.fetchall()
+  dates = tuple(x[0] for x in rows)
+  visits = [1] * len(dates)
+  cumv = np.cumsum(visits)
 
-# for row in rows:
-#   print "r: ", row[0]
-dates = tuple(x[0] for x in rows)
+  plt.plot_date(x=dates, y=cumv, fmt="r-")
 
-ts = pd.Series(dates)
-ts.plot()
+# messing with ticks
+# x = range(len(dates))
+# plt.xticks(x, dates)
+# locs, labels = plt.xticks()
+# plt.setp(labels, rotation=90)
 
 plt.show()
 
