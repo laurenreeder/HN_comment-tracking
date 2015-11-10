@@ -1,47 +1,52 @@
-import psycopg2
+import psycopg2, sys, mpld3
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import sys
+from flask import Flask
 
 
-# matplotlib.style.use('ggplot')
+app = Flask(__name__)
 
-try:
-    conn = psycopg2.connect("dbname='hacker_news' user='postgres' host='localhost' password='1234'")
-except:
-    print "Unable to connect to the database."
-
-cur = conn.cursor()
-
-input_var = raw_input("Enter single search term or phrase, separated by commas: ")
-inputs = input_var.split(',')
-
-for input_i in inputs:
-  input_i = input_i.strip()
-  input_i = "'%"+input_i+"%'"   # format SQL string
+@app.route('/')
+def get_db_args():
   try:
-    cur.execute("""SELECT DISTINCT ON(created_at) created_at, author FROM hn_comments WHERE comment_text LIKE %s ORDER BY created_at ASC""" % input_i)
-    # hardcoded for testing
-    # cur.execute("""SELECT DISTINCT ON(created_at) created_at, author FROM hn_comments WHERE comment_text LIKE '%segment.io%' ORDER BY created_at ASC""")
+      conn = psycopg2.connect("dbname='hacker_news' user='postgres' host='localhost' password='1234'")
   except:
-    print "Could not run select command"
+      print "Unable to connect to the database."
 
-  rows = cur.fetchall()
-  dates = tuple(x[0] for x in rows)
-  visits = [1] * len(dates)
-  cumv = np.cumsum(visits)
+  cur = conn.cursor()
 
-  plt.plot_date(x=dates, y=cumv, fmt="r-")
+  input_var = raw_input("Enter single search term or phrase, separated by commas: ")
+  inputs = input_var.split(',')
 
-# messing with ticks
-# x = range(len(dates))
-# plt.xticks(x, dates)
-# locs, labels = plt.xticks()
-# plt.setp(labels, rotation=90)
+  for input_i in inputs:
+    input_i = input_i.strip()
+    input_i = "'%"+input_i+"%'"   # format SQL string
+    try:
+      cur.execute("""SELECT DISTINCT ON(created_at) created_at, author FROM hn_comments WHERE comment_text LIKE %s ORDER BY created_at ASC""" % input_i)
+      # hardcoded for testing
+      # cur.execute("""SELECT DISTINCT ON(created_at) created_at, author FROM hn_comments WHERE comment_text LIKE '%segment.io%' ORDER BY created_at ASC""")
+    except:
+      print "Could not run select command"
 
-plt.show()
+    rows = cur.fetchall()
+    dates = tuple(x[0] for x in rows)
+    visits = [1] * len(dates)
+    cumv = np.cumsum(visits)
 
+    plt.plot_date(x=dates, y=cumv, fmt="r-")
 
-cur.close()
-conn.close()
+  # messing with ticks
+  # x = range(len(dates))
+  # plt.xticks(x, dates)
+  # locs, labels = plt.xticks()
+  # plt.setp(labels, rotation=90)
+  # plt.show()
+
+  mpld3.show()
+
+  cur.close()
+  conn.close()
+
+if __name__ == '__main__':
+    app.run()
