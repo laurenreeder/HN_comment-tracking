@@ -24,8 +24,6 @@ def get_db_args():
     input_i = "'%"+input_i+"%'"   # format SQL string
     try:
       cur.execute("""SELECT DISTINCT ON(created_at) created_at, author FROM hn_comments WHERE comment_text LIKE %s ORDER BY created_at ASC""" % input_i)
-      # hardcoded for testing
-      # cur.execute("""SELECT DISTINCT ON(created_at) created_at, author FROM hn_comments WHERE comment_text LIKE '%segment.io%' ORDER BY created_at ASC""")
     except:
       print "Could not run select command"
 
@@ -35,13 +33,6 @@ def get_db_args():
     cumv = np.cumsum(visits)
 
     plt.plot_date(x=dates, y=cumv, fmt="r-")
-
-  # messing with ticks
-  # x = range(len(dates))
-  # plt.xticks(x, dates)
-  # locs, labels = plt.xticks()
-  # plt.setp(labels, rotation=90)
-  # plt.show()
 
   mpld3.show()
 
