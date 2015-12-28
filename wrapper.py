@@ -1,4 +1,4 @@
-import psycopg2, sys, mpld3
+import psycopg2, sys, mpld3, os
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -7,6 +7,8 @@ from oauth2client.client import GoogleCredentials
 
 
 app = Flask(__name__)
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.abspath('hn-comments-104e4b796685.json')
+credentials = GoogleCredentials.get_application_default()
 
 @app.route('/')
 def get_db_args():
