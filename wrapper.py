@@ -5,11 +5,6 @@ from oauth2client.client import GoogleCredentials
 from googleapiclient.discovery import build
 
 
-app = Flask(__name__)
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.abspath('hn-comments-104e4b796685.json')
-credentials = GoogleCredentials.get_application_default()
-service = build('compute', 'v1', credentials=credentials)
-
 @app.route('/')
 def get_db_args():
   try:
@@ -43,4 +38,8 @@ def get_db_args():
   conn.close()
 
 if __name__ == '__main__':
-    app.run()
+  app = Flask(__name__)
+  os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.abspath('hn-comments-104e4b796685.json')
+  credentials = GoogleCredentials.get_application_default()
+  service = build('compute', 'v1', credentials=credentials)
+  app.run()
